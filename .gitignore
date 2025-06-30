@@ -1,0 +1,12 @@
+# Go build files
+bin/
+*.exe
+*.out
+*.log
+
+# IDE settings
+.idea/
+*.iml
+
+# Env
+.env
