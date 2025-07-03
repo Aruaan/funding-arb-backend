@@ -1,0 +1,9 @@
+POST http://localhost:8080/trade
+Content-Type: application/json
+
+{
+  "exchange": "Bybit",
+  "side": "long",
+  "symbol": "BTCUSDT",
+  "amount": 50
+}
