@@ -1,9 +1,2 @@
-POST http://localhost:8080/trade
+POST http://localhost:8080/test-auth/okx
 Content-Type: application/json
-
-{
-  "exchange": "Bybit",
-  "side": "long",
-  "symbol": "BTCUSDT",
-  "amount": 50
-}

@@ -23,18 +23,35 @@ func main() {
 	r.HandleFunc("/test-auth/{exchange}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		exchange := vars["exchange"]
+		var dummyTrade services.TradeRequest
 
 		switch exchange {
 		case "binance":
-			services.TestBinanceAuth()
+			dummyTrade = services.TradeRequest{
+				Symbol: "BTCUSDT",
+				Side:   "long",
+				Amount: 0.001, // Binance min lot size for BTC
+			}
+			services.ExecuteBinanceTrade(dummyTrade)
+
 		case "bybit":
-			services.TestBybitAuth()
+			dummyTrade = services.TradeRequest{
+				Symbol: "BTCUSDT",
+				Side:   "long",
+				Amount: 0.02, // Bybit min size
+			}
+			services.ExecuteBybitTrade(dummyTrade)
+
 		case "okx":
-			services.TestOkxAuth()
-		case "hyperliquid":
-			services.TestHyperliquidReadOnly()
+			dummyTrade = services.TradeRequest{
+				Symbol: "BTC-USDT-SWAP",
+				Side:   "long",
+				Amount: 0.02, // OKX SWAP minSz
+			}
+			services.ExecuteOkxTrade(dummyTrade)
+
 		default:
-			http.Error(w, "Unknown exchange", http.StatusBadRequest)
+			http.Error(w, "Unsupported exchange", http.StatusBadRequest)
 			return
 		}
 
