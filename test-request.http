@@ -1,2 +1,2 @@
-POST http://localhost:8080/test-auth/okx
+GET http://localhost:8080/balance/bybit
 Content-Type: application/json

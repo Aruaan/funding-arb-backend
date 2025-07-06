@@ -16,48 +16,6 @@ func main() {
 	utils.LoadEnv()
 	r := mux.NewRouter()
 
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "OK")
-	}).Methods("GET")
-
-	r.HandleFunc("/test-auth/{exchange}", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		exchange := vars["exchange"]
-		var dummyTrade services.TradeRequest
-
-		switch exchange {
-		case "binance":
-			dummyTrade = services.TradeRequest{
-				Symbol: "BTCUSDT",
-				Side:   "long",
-				Amount: 0.001, // Binance min lot size for BTC
-			}
-			services.ExecuteBinanceTrade(dummyTrade)
-
-		case "bybit":
-			dummyTrade = services.TradeRequest{
-				Symbol: "BTCUSDT",
-				Side:   "long",
-				Amount: 0.02, // Bybit min size
-			}
-			services.ExecuteBybitTrade(dummyTrade)
-
-		case "okx":
-			dummyTrade = services.TradeRequest{
-				Symbol: "BTC-USDT-SWAP",
-				Side:   "long",
-				Amount: 0.02, // OKX SWAP minSz
-			}
-			services.ExecuteOkxTrade(dummyTrade)
-
-		default:
-			http.Error(w, "Unsupported exchange", http.StatusBadRequest)
-			return
-		}
-
-		fmt.Fprintf(w, "Auth test sent to %s\n", exchange)
-	}).Methods("POST")
-
 	r.HandleFunc("/trade", func(w http.ResponseWriter, r *http.Request) {
 		var tradeReq services.TradeRequest
 		err := json.NewDecoder(r.Body).Decode(&tradeReq)
@@ -71,6 +29,10 @@ func main() {
 		switch strings.ToLower(tradeReq.Exchange) {
 		case "bybit":
 			services.ExecuteBybitTrade(tradeReq)
+		case "binance":
+			services.ExecuteBinanceTrade(tradeReq)
+		case "okx":
+			services.ExecuteOkxTrade(tradeReq)
 		default:
 			http.Error(w, "Unsupported exchange", http.StatusBadRequest)
 			return
@@ -78,6 +40,24 @@ func main() {
 
 		fmt.Fprintln(w, "Trade request received")
 	}).Methods("POST")
+
+	r.HandleFunc("/balance/{exchange}", func(w http.ResponseWriter, r *http.Request) {
+		exchange := mux.Vars(r)["exchange"]
+
+		switch exchange {
+		case "binance":
+			services.TestBinanceAuth()
+		case "bybit":
+			services.TestBybitAuth()
+		case "okx":
+			services.TestOkxAuth()
+		default:
+			http.Error(w, "Unsupported exchange", http.StatusBadRequest)
+			return
+		}
+		fmt.Fprintf(w, "Balance check sent to %s\n", exchange)
+
+	}).Methods("GET")
 
 	fmt.Println("Server running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
